@@ -62,7 +62,6 @@
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
-            <version>4.19.0</version>
         </dependency>
 
         <dependency>

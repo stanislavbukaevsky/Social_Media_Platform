@@ -35,6 +35,7 @@ import static com.github.stanislavbukaevsky.socialmediaplatform.constant.LoggerT
 public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final UserSecurity userSecurity;
     private final UserSecurityService userSecurityService;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenUtils jwtTokenUtils;
@@ -48,9 +49,9 @@ public class AuthServiceImpl implements AuthService {
      */
     @Override
     public UserDto registration(RegistrationDto registrationDto) {
-        Boolean checkUser = userRepository.existsUserByUsernameAndEmail(registrationDto.getUsername(), registrationDto.getEmail());
+        Boolean checkUser = userRepository.existsUserByUsernameAndEmail(userSecurity.getUsername(), registrationDto.getEmail());
         if (checkUser) {
-            log.info(REGISTRATION_MESSAGE_LOGGER_SERVICE_2, registrationDto.getUsername(), registrationDto.getEmail());
+            log.debug(REGISTRATION_MESSAGE_LOGGER_SERVICE_2, registrationDto.getUsername(), registrationDto.getEmail());
             throw new UserNameAlreadyExistsException(REGISTRATION_MESSAGE_EXCEPTION_SERVICE + registrationDto.getUsername() + " " + registrationDto.getEmail() + REGISTRATION_MESSAGE_EXCEPTION_SERVICE_2);
         } else {
             User user = new User();

@@ -49,9 +49,7 @@ public class AuthController {
      */
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Новый пользователь зарегистрирован (OK)", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UserDto.class))),
-            @ApiResponse(responseCode = "401", description = "Неавторизированный пользователь (Unauthorized)"),
-            @ApiResponse(responseCode = "403", description = "Пользователю запрещен вход на этот ресурс (Forbidden)"),
-            @ApiResponse(responseCode = "404", description = "Пользователь не найден (Not Found)")
+            @ApiResponse(responseCode = "400", description = "Неккоректный запрос (Bad Request)")
     })
     @Operation(summary = "Метод регистрации пользователей на платформе", description = "Позволяет зарегистрироваться новому пользователю на платформе")
     @PostMapping("/registration")
@@ -69,6 +67,7 @@ public class AuthController {
      */
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Пользователь успешно авторизирован (OK)", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = JwtRequestDto.class))),
+            @ApiResponse(responseCode = "400", description = "Неккоректный запрос (Bad Request)"),
             @ApiResponse(responseCode = "401", description = "Неавторизированный пользователь (Unauthorized)"),
             @ApiResponse(responseCode = "403", description = "Пользователю запрещен вход на этот ресурс (Forbidden)"),
             @ApiResponse(responseCode = "404", description = "Пользователь не найден (Not Found)")
@@ -79,7 +78,7 @@ public class AuthController {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(jwtRequestDto.getUsername(), jwtRequestDto.getPassword()));
         } catch (BadCredentialsException e) {
-            log.info(AUTHORIZATION_MESSAGE_LOGGER_CONTROLLER_2, jwtRequestDto.getUsername(), jwtRequestDto.getPassword());
+            log.debug(AUTHORIZATION_MESSAGE_LOGGER_CONTROLLER_2, jwtRequestDto.getUsername(), jwtRequestDto.getPassword());
             return new ResponseEntity<>(new AppErrorDto(HttpStatus.UNAUTHORIZED.value(), AUTHORIZATION_MESSAGE_EXCEPTION_CONTROLLER), HttpStatus.UNAUTHORIZED);
         }
 
