@@ -9,13 +9,14 @@ import org.mapstruct.Mapper;
 @Mapper
 public interface JwtMapper {
     /**
-     * Этот метод преобразует полученные поля в DTO, для получения токена
+     * Этот метод преобразует полученные поля в DTO, для получения токенов
      *
-     * @param id       идентификатор пользователя
-     * @param username логин пользователя
-     * @param email    электронная почта
-     * @param token    jwt-токен
+     * @param id           идентификатор пользователя
+     * @param username     логин пользователя
+     * @param email        электронная почта
+     * @param accessToken  jwt access-токен
+     * @param refreshToken jwt refresh-токен
      * @return Возвращает DTO, содержащую ответ пользователю на запрос
      */
-    JwtResponseDto toJwtDto(Long id, String username, String email, String token);
+    JwtResponseDto toJwtDto(Long id, String username, String email, String accessToken, String refreshToken);
 }

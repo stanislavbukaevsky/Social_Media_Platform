@@ -1,5 +1,6 @@
 package com.github.stanislavbukaevsky.socialmediaplatform.dto;
 
+import com.github.stanislavbukaevsky.socialmediaplatform.enums.Blocking;
 import com.github.stanislavbukaevsky.socialmediaplatform.enums.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -41,4 +42,6 @@ public class UserDto {
     private LocalDateTime updatedAt;
     @Schema(description = "Роль пользователя")
     private Role role;
+    @Schema(description = "Состояние блокировки пользователя")
+    private Blocking blocking;
 }
