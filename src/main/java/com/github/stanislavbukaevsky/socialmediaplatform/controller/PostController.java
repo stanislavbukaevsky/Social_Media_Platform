@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -29,7 +30,7 @@ import static com.github.stanislavbukaevsky.socialmediaplatform.constant.LoggerT
  * Класс-контроллер для работы со всеми постами, опубликованными на платформе
  */
 @RestController
-@RequestMapping("/post")
+@RequestMapping("/posts")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Работа со всеми постами размещенными на платформе", description = "Позволяет управлять методами по работе со всеми постами размещенными на платформе")
@@ -53,6 +54,7 @@ public class PostController {
     })
     @Operation(summary = "Метод для добавления постов на платформу", description = "Позволяет добавить пост на платформу")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('MODERATOR') or hasAuthority('ADMIN')")
     public ResponseEntity<PostDto> addPost(@RequestPart(name = "description") @Valid PostCreatedDto postCreatedDto, @RequestPart(name = "image") MultipartFile imageFile) throws IOException {
         log.info(ADD_POST_MESSAGE_LOGGER_CONTROLLER);
         return ResponseEntity.ok(postService.addPost(postCreatedDto, imageFile));
@@ -102,10 +104,12 @@ public class PostController {
             @ApiResponse(responseCode = "200", description = "Пост успешно изменен (OK)", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PostDto.class))),
             @ApiResponse(responseCode = "401", description = "Неавторизированный пользователь (Unauthorized)"),
             @ApiResponse(responseCode = "403", description = "Пользователю запрещен вход на этот ресурс (Forbidden)"),
-            @ApiResponse(responseCode = "404", description = "Пост не найден (Not Found)")
+            @ApiResponse(responseCode = "404", description = "Пост не найден (Not Found)"),
+            @ApiResponse(responseCode = "500", description = "Ошибка на сервере (Internal Server Error)")
     })
     @Operation(summary = "Метод для изменения информации о посте, размещенного на платформе", description = "Позволяет изменить информацию о посте, размещенном на платформе")
     @PatchMapping("/{id}")
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('MODERATOR') or hasAuthority('ADMIN')")
     public ResponseEntity<PostDto> updatePost(@Parameter(description = "Идентификатор изменяемого поста") @PathVariable Long id, @RequestBody @Valid PostCreatedDto postCreatedDto) {
         log.info(UPDATE_POST_MESSAGE_LOGGER_CONTROLLER, id);
         return ResponseEntity.ok(postService.updatePost(id, postCreatedDto));
@@ -124,6 +128,7 @@ public class PostController {
     })
     @Operation(summary = "Метод для изменения изображения у поста, размещенного на платформе", description = "Позволяет изменить изображение у поста, размещенного на платформе")
     @PatchMapping(path = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('MODERATOR') or hasAuthority('ADMIN')")
     public ResponseEntity<PostDto> updatePostImage(@Parameter(description = "Идентификатор поста") @PathVariable Long id, @RequestPart(name = "image") MultipartFile imageFile) throws IOException {
         log.info(UPDATE_POST_IMAGE_MESSAGE_LOGGER_CONTROLLER, id);
         return ResponseEntity.ok(postService.updatePostImage(id, imageFile));
@@ -142,6 +147,7 @@ public class PostController {
     })
     @Operation(summary = "Метод для удаления поста, размещенного на платформе", description = "Позволяет удалить пост, размещенный на платформе")
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('USER') or hasAuthority('MODERATOR') or hasAuthority('ADMIN')")
     public ResponseEntity<Void> deletePost(@Parameter(description = "Идентификатор удаляемого поста") @PathVariable Long id) {
         postService.deletePost(id);
         log.info(DELETE_POST_MESSAGE_LOGGER_CONTROLLER, id);

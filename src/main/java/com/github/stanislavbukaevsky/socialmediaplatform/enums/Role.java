@@ -2,8 +2,8 @@ package com.github.stanislavbukaevsky.socialmediaplatform.enums;
 
 /**
  * Перечисление для разделения ролей всех пользователей
- * (Пользователь, Администратор)
+ * (Пользователь, Модератор, Администратор)
  */
 public enum Role {
-    USER, ADMIN
+    USER, MODERATOR, ADMIN
 }

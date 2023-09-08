@@ -3,6 +3,7 @@ package com.github.stanislavbukaevsky.socialmediaplatform.entity;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.github.stanislavbukaevsky.socialmediaplatform.enums.Blocking;
 import com.github.stanislavbukaevsky.socialmediaplatform.enums.Role;
 import lombok.*;
 import org.hibernate.annotations.LazyCollection;
@@ -61,4 +62,9 @@ public class User {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<User> subscribers = new HashSet<>();
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private Token token;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "blocking")
+    private Blocking blocking;
 }

@@ -7,8 +7,10 @@ import com.github.stanislavbukaevsky.socialmediaplatform.dto.ResponseWrapperPost
 import com.github.stanislavbukaevsky.socialmediaplatform.entity.Image;
 import com.github.stanislavbukaevsky.socialmediaplatform.entity.Post;
 import com.github.stanislavbukaevsky.socialmediaplatform.entity.User;
+import com.github.stanislavbukaevsky.socialmediaplatform.enums.Blocking;
 import com.github.stanislavbukaevsky.socialmediaplatform.enums.Role;
 import com.github.stanislavbukaevsky.socialmediaplatform.exception.ActivityFeedNotFoundException;
+import com.github.stanislavbukaevsky.socialmediaplatform.exception.BlockingForbiddenException;
 import com.github.stanislavbukaevsky.socialmediaplatform.exception.ImageNotFoundException;
 import com.github.stanislavbukaevsky.socialmediaplatform.exception.PostNotFoundException;
 import com.github.stanislavbukaevsky.socialmediaplatform.mapper.PostMapper;
@@ -77,15 +79,18 @@ public class PostServiceImpl implements PostService {
     public PostDto addPost(PostCreatedDto postCreatedDto, MultipartFile imageFile) throws IOException {
         LocalDateTime dateTime = LocalDateTime.now();
         User user = userService.findUserByUsername(userSecurity.getUsername());
-        Post post = postMapper.toPost(postCreatedDto);
-        post.setCreatedAt(dateTime);
-        post.setUpdatedAt(dateTime);
-        post.setUser(user);
-        Post savedPost = postRepository.save(post);
-        Image image = imageService.addImagePost(savedPost.getId(), imageFile);
-        savedPost.setImage(image);
-        log.info(ADD_POST_MESSAGE_LOGGER_SERVICE);
-        return postMapper.toPostDto(savedPost);
+        if (user.getBlocking().equals(Blocking.NOT_BAN)) {
+            Post post = postMapper.toPost(postCreatedDto);
+            post.setCreatedAt(dateTime);
+            post.setUpdatedAt(dateTime);
+            post.setUser(user);
+            Post savedPost = postRepository.save(post);
+            Image image = imageService.addImagePost(savedPost.getId(), imageFile);
+            savedPost.setImage(image);
+            log.info(ADD_POST_MESSAGE_LOGGER_SERVICE);
+            return postMapper.toPostDto(savedPost);
+        }
+        throw new BlockingForbiddenException(BLOCKING_FORBIDDEN_EXCEPTION);
     }
 
     /**
@@ -131,14 +136,17 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostDto updatePost(Long id, PostCreatedDto postCreatedDto) {
         Post post = findPostById(id);
-        LocalDateTime dateTime = LocalDateTime.now();
-        checkUsersByPost(id);
-        post.setTitle(postCreatedDto.getTitle());
-        post.setText(postCreatedDto.getText());
-        post.setUpdatedAt(dateTime);
-        Post result = postRepository.save(post);
-        log.info(UPDATE_POST_MESSAGE_LOGGER_SERVICE, id);
-        return postMapper.toPostDto(result);
+        if (post.getUser().getBlocking().equals(Blocking.NOT_BAN)) {
+            LocalDateTime dateTime = LocalDateTime.now();
+            checkUsersByPost(id);
+            post.setTitle(postCreatedDto.getTitle());
+            post.setText(postCreatedDto.getText());
+            post.setUpdatedAt(dateTime);
+            Post result = postRepository.save(post);
+            log.info(UPDATE_POST_MESSAGE_LOGGER_SERVICE, id);
+            return postMapper.toPostDto(result);
+        }
+        throw new BlockingForbiddenException(BLOCKING_FORBIDDEN_EXCEPTION_2);
     }
 
     /**
@@ -151,16 +159,18 @@ public class PostServiceImpl implements PostService {
      */
     @Override
     public PostDto updatePostImage(Long id, MultipartFile imageFile) throws IOException {
-        checkUsersByPost(id);
         Post post = findPostById(id);
-
-        if (post.getImage() == null) {
-            imageService.addImagePost(post.getId(), imageFile);
-        } else if (post.getImage() != null) {
-            imageService.updateImagePost(post.getId(), imageFile);
+        if (post.getUser().getBlocking().equals(Blocking.NOT_BAN)) {
+            checkUsersByPost(id);
+            if (post.getImage() == null) {
+                imageService.addImagePost(post.getId(), imageFile);
+            } else if (post.getImage() != null) {
+                imageService.updateImagePost(post.getId(), imageFile);
+            }
+            log.info(UPDATE_POST_IMAGE_MESSAGE_LOGGER_SERVICE, id);
+            return postMapper.toPostDto(post);
         }
-        log.info(UPDATE_POST_IMAGE_MESSAGE_LOGGER_SERVICE, id);
-        return postMapper.toPostDto(post);
+        throw new BlockingForbiddenException(BLOCKING_FORBIDDEN_EXCEPTION_3);
     }
 
     /**
@@ -171,10 +181,13 @@ public class PostServiceImpl implements PostService {
     @Override
     public void deletePost(Long id) {
         Post post = findPostById(id);
-        if (checkUsersByPost(post.getId())) {
-            postRepository.deleteById(id);
-            log.info(DELETE_POST_MESSAGE_LOGGER_SERVICE, id);
+        if (post.getUser().getBlocking().equals(Blocking.NOT_BAN)) {
+            if (checkUsersByPost(post.getId())) {
+                postRepository.deleteById(id);
+                log.info(DELETE_POST_MESSAGE_LOGGER_SERVICE, id);
+            }
         }
+        throw new BlockingForbiddenException(BLOCKING_FORBIDDEN_EXCEPTION_4);
     }
 
     /**

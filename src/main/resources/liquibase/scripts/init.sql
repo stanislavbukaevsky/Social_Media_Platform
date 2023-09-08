@@ -61,3 +61,16 @@ create table subscriptions
     updated_at       timestamp default current_timestamp,
     status           VARCHAR(32) NOT NULL
 );
+
+--changeset sbukaevsky:2
+create table tokens
+(
+    id            bigserial primary key unique,
+    refresh_token varchar not null,
+    date_and_time timestamp default current_timestamp,
+    user_id       bigserial
+);
+
+--changeset sbukaevsky:3
+alter table users
+    add blocking varchar(32) not null;

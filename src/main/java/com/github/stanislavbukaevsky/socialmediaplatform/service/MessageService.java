@@ -3,6 +3,7 @@ package com.github.stanislavbukaevsky.socialmediaplatform.service;
 import com.github.stanislavbukaevsky.socialmediaplatform.dto.CorrespondenceDto;
 import com.github.stanislavbukaevsky.socialmediaplatform.dto.MessageDto;
 import com.github.stanislavbukaevsky.socialmediaplatform.dto.TextDto;
+import com.github.stanislavbukaevsky.socialmediaplatform.entity.User;
 
 import java.util.List;
 
@@ -28,4 +29,14 @@ public interface MessageService {
      * @return Возвращает список DTO-сообщений
      */
     List<CorrespondenceDto> requestForUserCorrespondence(Long recipientId);
+
+    /**
+     * Сигнатура метода для создания нового личного сообщения
+     *
+     * @param text          текст сообщения
+     * @param senderUser    пользователь, отправляющий сообщение
+     * @param recipientUser пользователь, получающий сообщение
+     * @return Возвращает DTO готового личного сообщения
+     */
+    MessageDto addMessageDto(TextDto text, User senderUser, User recipientUser);
 }
